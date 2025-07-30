@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Ujian</title>
+  <script>
+    const SHEET_ID = 'GANTI_DENGAN_SPREADSHEET_ID';
+    const FORM_ACTION = 'GANTI_DENGAN_URL_WEB_APP';
+
+    let soal = [], jawaban = {}, current = 0;
+    const timerLimit = 900; // 15 menit
+
+    function loadSoal() {
+      fetch(`https://opensheet.elk.sh/${SHEET_ID}/soal`)
+        .then(res => res.json())
+        .then(data => {
+          soal = data;
+          tampilkanSoal();
+          mulaiTimer();
+        });
+    }
+
+    function tampilkanSoal() {
+      const s = soal[current];
+      document.getElementById("soal").innerHTML = \`
+        <b>Soal \${s.no}</b><br>\${s.soal}<br>
+        <label><input type="radio" name="opsi" value="a"> A. \${s.a}</label><br>
+        <label><input type="radio" name="opsi" value="b"> B. \${s.b}</label><br>
+        <label><input type="radio" name="opsi" value="c"> C. \${s.c}</label><br>
+        <label><input type="radio" name="opsi" value="d"> D. \${s.d}</label><br>
+      \`;
+    }
+
+    function nextSoal() {
+      const jawabanSiswa = document.querySelector('input[name="opsi"]:checked');
+      if (!jawabanSiswa) return alert("Pilih jawaban!");
+
+      jawaban[soal[current].no] = jawabanSiswa.value;
+      current++;
+      if (current >= soal.length) kirimHasil();
+      else tampilkanSoal();
+    }
+
+    function mulaiTimer() {
+      let sisa = timerLimit;
+      const interval = setInterval(() => {
+        document.getElementById("timer").textContent = sisa + " detik";
+        sisa--;
+        if (sisa < 0) {
+          clearInterval(interval);
+          kirimHasil();
+        }
+      }, 1000);
+    }
+
+    function kirimHasil() {
+      let benar = 0;
+      soal.forEach(s => {
+        if (jawaban[s.no] === s.kunci) benar++;
+      });
+
+      fetch(FORM_ACTION, {
+        method: "POST",
+        body: JSON.stringify({
+          nama: localStorage.getItem("nama"),
+          kelas: localStorage.getItem("kelas"),
+          skor: benar,
+          total: soal.length
+        }),
+        headers: { "Content-Type": "application/json" }
+      });
+
+      localStorage.setItem("jawaban", JSON.stringify(jawaban));
+      localStorage.setItem("soal", JSON.stringify(soal));
+      window.location.href = "pembahasan.html";
+    }
+
+    window.onload = loadSoal;
+  </script>
+</head>
+<body>
+  <div id="timer">Timer</div>
+  <div id="soal"></div>
+  <button onclick="nextSoal()">Berikutnya</button>
+</body>
+</html>
