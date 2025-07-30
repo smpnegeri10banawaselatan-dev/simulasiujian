@@ -2,102 +2,39 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Pembahasan Soal</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>Pembahasan</title>
 </head>
-<body class="bg-gray-100 p-4 font-sans">
-
-  <div class="max-w-4xl mx-auto bg-white p-6 rounded shadow">
-    <h1 class="text-2xl font-bold mb-4">📘 Pembahasan Ujian</h1>
-    <p class="mb-2 text-sm text-gray-600">Nama: <span id="nama"></span> | Kelas: <span id="kelas"></span></p>
-
-    <div class="mb-6">
-      <canvas id="kompetensiChart" height="120"></canvas>
-    </div>
-
-    <div id="pembahasan-container"></div>
-  </div>
-
+<body>
+  <h2>Pembahasan Soal</h2>
+  <div id="pembahasan"></div>
   <script>
-    const nama = localStorage.getItem('nama');
-    const kelas = localStorage.getItem('kelas');
-    const jawabanUser = JSON.parse(localStorage.getItem('jawabanUser') || '{}');
-    document.getElementById('nama').textContent = nama;
-    document.getElementById('kelas').textContent = kelas;
+    const soal = JSON.parse(localStorage.getItem("soal"));
+    const jawaban = JSON.parse(localStorage.getItem("jawaban"));
 
-    const SHEET_ID = 'GANTI_DENGAN_ID_SHEET_ANDA';
-    const SHEET_NAME = 'soal';
+    let benar = 0;
+    let kompetensiNilai = {};
 
-    let soalData = [];
-    let skorPerKompetensi = {};
+    soal.forEach((s, i) => {
+      const jwb = jawaban[s.no];
+      const benarJawab = jwb === s.kunci;
+      if (benarJawab) benar++;
 
-    async function fetchSoal() {
-      const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
-      const res = await fetch(url);
-      soalData = await res.json();
-      tampilkanPembahasan();
-      tampilkanGrafik();
+      if (!kompetensiNilai[s.kompetensi]) kompetensiNilai[s.kompetensi] = { benar: 0, total: 0 };
+      kompetensiNilai[s.kompetensi].total++;
+      if (benarJawab) kompetensiNilai[s.kompetensi].benar++;
+
+      document.getElementById("pembahasan").innerHTML += \`
+        <b>Soal \${s.no}</b><br>\${s.soal}<br>
+        Jawaban Anda: <b>\${jwb}</b> | Kunci: <b>\${s.kunci}</b><br>
+        Pembahasan: \${s.pembahasan}<br><br>
+      \`;
+    });
+
+    document.getElementById("pembahasan").innerHTML += "<hr><h3>Analisis Kompetensi</h3>";
+    for (const k in kompetensiNilai) {
+      const n = kompetensiNilai[k];
+      document.getElementById("pembahasan").innerHTML += \`\${k}: \${n.benar}/\${n.total}<br>\`;
     }
-
-    function tampilkanPembahasan() {
-      const container = document.getElementById('pembahasan-container');
-      container.innerHTML = soalData.map((soal, index) => {
-        const pilihan = jawabanUser[index] || '-';
-        const benar = soal.kunci.toLowerCase();
-        const benarText = soal[benar];
-        const pilihanText = soal[pilihan] || '-';
-        const benarClass = (pilihan === benar) ? 'text-green-600' : 'text-red-600';
-
-        // Hitung skor per kompetensi
-        const komp = soal.kompetensi || 'Lainnya';
-        if (!skorPerKompetensi[komp]) {
-          skorPerKompetensi[komp] = { benar: 0, total: 0 };
-        }
-        skorPerKompetensi[komp].total++;
-        if (pilihan === benar) skorPerKompetensi[komp].benar++;
-
-        return `
-          <div class="mb-6 border-b pb-4">
-            <p class="font-semibold">Soal ${index + 1}</p>
-            <p class="mb-2">${soal.soal}</p>
-            <p><span class="font-semibold">Jawaban Anda:</span> <span class="${benarClass}">${pilihan.toUpperCase()}. ${pilihanText}</span></p>
-            <p><span class="font-semibold">Kunci Jawaban:</span> ${benar.toUpperCase()}. ${benarText}</p>
-            <p class="mt-2 text-sm text-gray-600"><strong>Pembahasan:</strong> ${soal.pembahasan || '-'}</p>
-            <p class="text-sm text-gray-500">Kompetensi: ${soal.kompetensi || '-'}</p>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function tampilkanGrafik() {
-      const ctx = document.getElementById('kompetensiChart').getContext('2d');
-      const labels = Object.keys(skorPerKompetensi);
-      const data = labels.map(k => {
-        const v = skorPerKompetensi[k];
-        return ((v.benar / v.total) * 100).toFixed(1);
-      });
-
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Skor per Kompetensi (%)',
-            data: data,
-            backgroundColor: '#60a5fa'
-          }]
-        },
-        options: {
-          scales: {
-            y: { beginAtZero: true, max: 100 }
-          }
-        }
-      });
-    }
-
-    fetchSoal();
   </script>
 </body>
 </html>
