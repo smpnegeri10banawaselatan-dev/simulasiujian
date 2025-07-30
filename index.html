@@ -1,40 +1,55 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Aplikasi Kuis Offline</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login Ujian</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
 </head>
-<body class="bg-gray-100 p-6 font-sans">
-  <div class="max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-md">
-    <nav class="flex justify-between mb-6">
-      <button onclick="showPage('loginPage')" class="text-blue-600 hover:underline">Login</button>
-      <button onclick="showPage('quizPage')" class="text-blue-600 hover:underline">Simpan Hasil</button>
-    </nav>
+<body class="bg-gradient-to-br from-blue-100 to-blue-300 min-h-screen flex items-center justify-center">
+  <form class="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm text-center" onsubmit="login(event)">
+    <!-- Logo -->
+    <img src="logo.png" alt="Logo Sekolah" class="w-20 h-20 mx-auto mb-4 rounded-full shadow" />
+    <h2 class="text-2xl font-bold mb-1">🔐 Login Ujian</h2>
+    <p class="text-sm text-gray-600 mb-6">Silakan login untuk memulai ujian</p>
 
-    <!-- Login Page -->
-    <div id="loginPage" class="page">
-      <h2 class="text-xl font-bold mb-4 text-center">Login</h2>
-      <input id="username" type="text" placeholder="Username" class="w-full mb-3 p-2 border rounded" />
-      <input id="password" type="password" placeholder="Password" class="w-full mb-3 p-2 border rounded" />
-      <button onclick="login()" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Login</button>
+    <div class="mb-4 text-left">
+      <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+      <input id="username" type="text" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Masukkan username" />
     </div>
 
-    <!-- Quiz Page -->
-    <div id="quizPage" class="page hidden">
-      <h2 class="text-xl font-bold mb-4 text-center">Simpan Hasil Kuis</h2>
-      <input id="nama" type="text" placeholder="Nama" class="w-full mb-3 p-2 border rounded" />
-      <input id="kelas" type="text" placeholder="Kelas" class="w-full mb-3 p-2 border rounded" />
-      <input id="kuis" type="text" placeholder="Judul Kuis" class="w-full mb-3 p-2 border rounded" />
-      <input id="skor" type="number" placeholder="Skor" class="w-full mb-3 p-2 border rounded" />
-      <input id="total" type="number" placeholder="Total Skor" class="w-full mb-3 p-2 border rounded" />
-      <button onclick="simpanHasil()" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600">Simpan</button>
+    <div class="mb-6 text-left">
+      <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+      <input id="password" type="password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Masukkan password" />
     </div>
 
-    <p id="hasil" class="mt-4 text-center text-sm text-gray-700"></p>
-  </div>
+    <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2 rounded hover:bg-blue-700 transition">
+      <i class="bi bi-box-arrow-in-right mr-2"></i>Masuk
+    </button>
+  </form>
 
-  <script src="script.js"></script>
+  <script>
+    async function login(event) {
+      event.preventDefault();
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      const res = await fetch("PASTE_APPS_SCRIPT_WEBAPP_URL", {
+        method: "POST",
+        body: JSON.stringify({ username, password }),
+        headers: { "Content-Type": "application/json" }
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        localStorage.setItem("loginUser", data.username);
+        localStorage.setItem("loginRole", data.role);
+        window.location.href = "index.html";
+      } else {
+        alert(data.message);
+      }
+    }
+  </script>
 </body>
 </html>
