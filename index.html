@@ -1,37 +1,80 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <title>Login Ujian</title>
+  <meta charset="UTF-8">
+  <title>Contoh Login & Simpan Hasil</title>
+</head>
+<body>
+  <h2>Login</h2>
+  <input type="text" id="username" placeholder="Username"><br>
+  <input type="password" id="password" placeholder="Password"><br>
+  <button onclick="login()">Login</button>
+
+  <hr>
+
+  <h2>Simpan Hasil Kuis</h2>
+  <input type="text" id="nama" placeholder="Nama"><br>
+  <input type="text" id="kelas" placeholder="Kelas"><br>
+  <input type="number" id="skor" placeholder="Skor"><br>
+  <input type="number" id="total" placeholder="Total"><br>
+  <button onclick="simpanHasil()">Simpan</button>
+
+  <p id="hasil"></p>
+
   <script>
-    async function login(event) {
-      event.preventDefault();
+    const WEB_APP_URL = 'https://script.google.com/macros/s/YOUR_WEB_APP_URL/exec';
+
+    function login() {
       const username = document.getElementById("username").value;
       const password = document.getElementById("password").value;
 
-      const res = await fetch("PASTE_APPS_SCRIPT_WEBAPP_URL", {
+      fetch(WEB_APP_URL, {
         method: "POST",
-        body: JSON.stringify({ username, password }),
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "login",
+          username: username,
+          password: password
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById("hasil").innerText = `Login berhasil sebagai ${data.role}`;
+        } else {
+          document.getElementById("hasil").innerText = data.message;
+        }
+      })
+      .catch(err => {
+        document.getElementById("hasil").innerText = "Terjadi kesalahan: " + err;
       });
+    }
 
-      const data = await res.json();
-      if (data.success) {
-        localStorage.setItem("loginUser", data.username);
-        localStorage.setItem("loginRole", data.role);
-        window.location.href = "soal.html"; // arahkan ke halaman utama
-      } else {
-        alert(data.message);
-      }
+    function simpanHasil() {
+      const nama = document.getElementById("nama").value;
+      const kelas = document.getElementById("kelas").value;
+      const skor = parseInt(document.getElementById("skor").value);
+      const total = parseInt(document.getElementById("total").value);
+
+      fetch(WEB_APP_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "simpanHasil",
+          nama: nama,
+          kelas: kelas,
+          skor: skor,
+          total: total
+        })
+      })
+      .then(res => res.text())
+      .then(text => {
+        document.getElementById("hasil").innerText = "Data berhasil disimpan!";
+      })
+      .catch(err => {
+        document.getElementById("hasil").innerText = "Gagal simpan: " + err;
+      });
     }
   </script>
-</head>
-<body>
-  <h2>🔐 Login Ujian Interaktif</h2>
-  <form onsubmit="login(event)">
-    <input type="text" id="username" placeholder="Username" required /><br />
-    <input type="password" id="password" placeholder="Password" required /><br />
-    <button type="submit">Login</button>
-  </form>
 </body>
 </html>
