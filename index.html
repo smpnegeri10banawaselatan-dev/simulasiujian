@@ -1,80 +1,40 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Contoh Login & Simpan Hasil</title>
+  <title>Aplikasi Kuis Offline</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h2>Login</h2>
-  <input type="text" id="username" placeholder="Username"><br>
-  <input type="password" id="password" placeholder="Password"><br>
-  <button onclick="login()">Login</button>
+<body class="bg-gray-100 p-6 font-sans">
+  <div class="max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-md">
+    <nav class="flex justify-between mb-6">
+      <button onclick="showPage('loginPage')" class="text-blue-600 hover:underline">Login</button>
+      <button onclick="showPage('quizPage')" class="text-blue-600 hover:underline">Simpan Hasil</button>
+    </nav>
 
-  <hr>
+    <!-- Login Page -->
+    <div id="loginPage" class="page">
+      <h2 class="text-xl font-bold mb-4 text-center">Login</h2>
+      <input id="username" type="text" placeholder="Username" class="w-full mb-3 p-2 border rounded" />
+      <input id="password" type="password" placeholder="Password" class="w-full mb-3 p-2 border rounded" />
+      <button onclick="login()" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Login</button>
+    </div>
 
-  <h2>Simpan Hasil Kuis</h2>
-  <input type="text" id="nama" placeholder="Nama"><br>
-  <input type="text" id="kelas" placeholder="Kelas"><br>
-  <input type="number" id="skor" placeholder="Skor"><br>
-  <input type="number" id="total" placeholder="Total"><br>
-  <button onclick="simpanHasil()">Simpan</button>
+    <!-- Quiz Page -->
+    <div id="quizPage" class="page hidden">
+      <h2 class="text-xl font-bold mb-4 text-center">Simpan Hasil Kuis</h2>
+      <input id="nama" type="text" placeholder="Nama" class="w-full mb-3 p-2 border rounded" />
+      <input id="kelas" type="text" placeholder="Kelas" class="w-full mb-3 p-2 border rounded" />
+      <input id="kuis" type="text" placeholder="Judul Kuis" class="w-full mb-3 p-2 border rounded" />
+      <input id="skor" type="number" placeholder="Skor" class="w-full mb-3 p-2 border rounded" />
+      <input id="total" type="number" placeholder="Total Skor" class="w-full mb-3 p-2 border rounded" />
+      <button onclick="simpanHasil()" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600">Simpan</button>
+    </div>
 
-  <p id="hasil"></p>
+    <p id="hasil" class="mt-4 text-center text-sm text-gray-700"></p>
+  </div>
 
-  <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/YOUR_WEB_APP_URL/exec';
-
-    function login() {
-      const username = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
-
-      fetch(WEB_APP_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "login",
-          username: username,
-          password: password
-        })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          document.getElementById("hasil").innerText = `Login berhasil sebagai ${data.role}`;
-        } else {
-          document.getElementById("hasil").innerText = data.message;
-        }
-      })
-      .catch(err => {
-        document.getElementById("hasil").innerText = "Terjadi kesalahan: " + err;
-      });
-    }
-
-    function simpanHasil() {
-      const nama = document.getElementById("nama").value;
-      const kelas = document.getElementById("kelas").value;
-      const skor = parseInt(document.getElementById("skor").value);
-      const total = parseInt(document.getElementById("total").value);
-
-      fetch(WEB_APP_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "simpanHasil",
-          nama: nama,
-          kelas: kelas,
-          skor: skor,
-          total: total
-        })
-      })
-      .then(res => res.text())
-      .then(text => {
-        document.getElementById("hasil").innerText = "Data berhasil disimpan!";
-      })
-      .catch(err => {
-        document.getElementById("hasil").innerText = "Gagal simpan: " + err;
-      });
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
